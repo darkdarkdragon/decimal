@@ -70,6 +70,8 @@ var testTableScientificNotation = map[string]string{
 	"1.2345E-1":  "0.12345",
 	"0e5":        "0",
 	"0e-5":       "0",
+	"0.e0":       "0",
+	".0e0":       "0",
 	"123.456e0":  "123.456",
 	"123.456e2":  "12345.6",
 	"123.456e10": "1234560000000",
@@ -471,6 +473,56 @@ func TestNewFromFloatWithExponent(t *testing.T) {
 		var d Decimal
 		if !didPanic(func() { d = NewFromFloatWithExponent(n, 0) }) {
 			t.Fatalf("Expected panic when creating a Decimal from %v, got %v instead", n, d.String())
+		}
+	}
+}
+
+func TestNewFromInt(t *testing.T) {
+	tests := map[int64]string{
+		0:                   "0",
+		1:                   "1",
+		323412345:           "323412345",
+		9223372036854775807: "9223372036854775807",
+	}
+
+	// add negatives
+	for p, s := range tests {
+		if p > 0 {
+			tests[-p] = "-" + s
+		}
+	}
+
+	for input, s := range tests {
+		d := NewFromInt(input)
+		if d.String() != s {
+			t.Errorf("expected %s, got %s (%s, %d)",
+				s, d.String(),
+				d.value.String(), d.exp)
+		}
+	}
+}
+
+func TestNewFromInt32(t *testing.T) {
+	tests := map[int32]string{
+		0:          "0",
+		1:          "1",
+		323412345:  "323412345",
+		2147483647: "2147483647",
+	}
+
+	// add negatives
+	for p, s := range tests {
+		if p > 0 {
+			tests[-p] = "-" + s
+		}
+	}
+
+	for input, s := range tests {
+		d := NewFromInt32(input)
+		if d.String() != s {
+			t.Errorf("expected %s, got %s (%s, %d)",
+				s, d.String(),
+				d.value.String(), d.exp)
 		}
 	}
 }
